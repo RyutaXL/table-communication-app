@@ -26,7 +26,7 @@ cd table-app
 
 ### Step 2: Set Project ID
 ```bash
-export PROJECT_ID="your-gcp-project-id"
+export PROJECT_ID="table-484004"
 ```
 
 ### Step 3: Deploy

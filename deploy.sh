@@ -6,7 +6,7 @@
 set -e
 
 # Configuration
-PROJECT_ID="${PROJECT_ID:-your-gcp-project-id}"
+PROJECT_ID="${PROJECT_ID:-table-484004}"
 REGION="asia-northeast1"
 SERVICE_NAME="table-communication-app"
 
