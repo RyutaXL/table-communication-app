@@ -163,13 +163,13 @@ test.describe('Table Communication App', () => {
     // モバイルビューポートに設定
     await page.setViewportSize({ width: 375, height: 667 });
 
-    // タブが横スクロール可能であることを確認
-    const tabsContainer = page.locator('.overflow-x-auto');
-    await expect(tabsContainer).toBeVisible();
+    // ナビゲーションリンクが表示されていることを確認
+    const navLinks = page.locator('nav a');
+    await expect(navLinks).toHaveCount(2);
 
-    // タブがスクロール可能なコンテナに含まれていることを確認
-    const tabs = tabsContainer.getByRole('tab');
-    await expect(tabs).toHaveCount(5);
+    // 各リンクが適切なhref属性を持っていることを確認
+    await expect(page.locator('nav a[href="/"]')).toBeVisible();
+    await expect(page.locator('nav a[href="/menu"]')).toBeVisible();
   });
 
   test('should display compact UI elements on mobile', async ({ page }) => {
