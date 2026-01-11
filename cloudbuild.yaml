@@ -51,7 +51,3 @@ images:
 
 # Set timeout
 timeout: '600s'
-
-# Environment variables for build
-substitutions:
-  _GEMINI_API_KEY: "" # Set this in Cloud Build trigger or via gcloud builds submit --substitutions

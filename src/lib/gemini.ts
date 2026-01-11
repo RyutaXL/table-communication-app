@@ -1,15 +1,25 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { VertexAI } from '@google-cloud/vertexai';
 
-// Initialize Gemini API
-const apiKey = process.env.GOOGLE_AI_API_KEY;
-if (!apiKey) {
-  console.warn('GOOGLE_AI_API_KEY is not set. Gemini API features will not work.');
+// Initialize Vertex AI with Gemini API
+let vertexAI: VertexAI | null = null;
+let model: any = null;
+
+try {
+  // サービスアカウント認証を使用（Application Default Credentials）
+  vertexAI = new VertexAI({
+    project: process.env.GOOGLE_CLOUD_PROJECT || 'table-484004',
+    location: 'us-central1', // Gemini APIのリージョン
+  });
+
+  model = vertexAI.getGenerativeModel({
+    model: 'gemini-1.5-flash',
+  });
+
+  console.log('Gemini API initialized with service account authentication');
+} catch (error) {
+  console.warn('Failed to initialize Gemini API with service account:', error);
+  console.warn('Make sure GOOGLE_APPLICATION_CREDENTIALS is set or running in GCP environment');
 }
-
-const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
-
-// Get the Gemini model
-const model = genAI?.getGenerativeModel({ model: 'gemini-1.5-flash' }) || null;
 
 export interface TranslationRequest {
   text: string;
@@ -27,8 +37,8 @@ export interface TranslationResponse {
  * Translate text using Gemini API
  */
 export async function translateText(request: TranslationRequest): Promise<TranslationResponse> {
-  if (!genAI || !model) {
-    throw new Error('Gemini API is not configured. Please set GOOGLE_AI_API_KEY environment variable.');
+  if (!vertexAI || !model) {
+    throw new Error('Gemini API is not configured. Please check service account authentication.');
   }
 
   try {
@@ -45,7 +55,7 @@ export async function translateText(request: TranslationRequest): Promise<Transl
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const translatedText = response.text().trim();
+    const translatedText = response.candidates[0].content.parts[0].text.trim();
 
     return {
       translatedText,
@@ -53,10 +63,7 @@ export async function translateText(request: TranslationRequest): Promise<Transl
     };
   } catch (error) {
     console.error('Gemini API error:', error);
-    if (error instanceof Error && error.message.includes('API_KEY')) {
-      throw new Error('Invalid Gemini API key. Please check your GOOGLE_AI_API_KEY.');
-    }
-    throw new Error('Translation failed. Please try again later.');
+    throw new Error('Translation failed. Please check service account configuration.');
   }
 }
 
@@ -64,8 +71,8 @@ export async function translateText(request: TranslationRequest): Promise<Transl
  * Generate restaurant-specific responses using Gemini
  */
 export async function generateRestaurantResponse(prompt: string, context?: string): Promise<string> {
-  if (!genAI || !model) {
-    throw new Error('Gemini API is not configured. Please set GOOGLE_AI_API_KEY environment variable.');
+  if (!vertexAI || !model) {
+    throw new Error('Gemini API is not configured. Please check service account authentication.');
   }
 
   try {
@@ -80,10 +87,10 @@ export async function generateRestaurantResponse(prompt: string, context?: strin
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
 
-    return response.text().trim();
+    return response.candidates[0].content.parts[0].text.trim();
   } catch (error) {
     console.error('Gemini API error:', error);
-    throw new Error('Response generation failed. Please try again later.');
+    throw new Error('Response generation failed. Please check service account configuration.');
   }
 }
 
@@ -91,7 +98,7 @@ export async function generateRestaurantResponse(prompt: string, context?: strin
  * Improve existing restaurant responses
  */
 export async function improveResponse(text: string, language: 'en' | 'es' | 'ja' = 'ja'): Promise<string> {
-  if (!genAI || !model) {
+  if (!vertexAI || !model) {
     console.warn('Gemini API is not configured. Returning original text.');
     return text; // Fallback to original text
   }
@@ -104,7 +111,7 @@ Please provide only the improved response without quotes or explanations.`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
 
-    return response.text().trim();
+    return response.candidates[0].content.parts[0].text.trim();
   } catch (error) {
     console.error('Gemini API error:', error);
     return text; // Fallback to original text
@@ -129,7 +136,7 @@ function detectLanguage(text: string): string {
  * Validate API key
  */
 export async function validateGeminiAPI(): Promise<boolean> {
-  if (!genAI || !model) {
+  if (!vertexAI || !model) {
     console.error('Gemini API is not configured');
     return false;
   }

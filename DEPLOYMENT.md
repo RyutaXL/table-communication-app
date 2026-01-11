@@ -109,13 +109,13 @@ jobs:
     # ... other args
 ```
 
-#### Gemini API設定
-1. [Google AI Studio](https://makersuite.google.com/app/apikey) でAPIキーを作成
-2. Cloud Buildのトリガー設定で `_GEMINI_API_KEY` を設定
-3. または、手動デプロイ時に `--substitutions=_GEMINI_API_KEY=YOUR_API_KEY` を指定
-4. サービスアカウント `table-gemini@table-484004.iam.gserviceaccount.com` がVertex AI User権限を持つことを確認
+#### Gemini API設定（サービスアカウント認証）
+1. サービスアカウント `table-gemini@table-484004.iam.gserviceaccount.com` が作成済み
+2. Vertex AI User権限 (`roles/aiplatform.user`) が付与済み
+3. Cloud Runサービスがサービスアカウントを使用するよう設定済み
+4. 環境変数でのAPIキー設定は不要（Application Default Credentials使用）
 
-**重要**: Gemini APIキーが設定されていない場合、翻訳機能は動作しません。
+**メリット**: APIキーの管理が不要で、より安全な認証方式です。
 
 ### Custom Domain
 ```bash
