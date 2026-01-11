@@ -161,16 +161,17 @@ export default function MenuPage() {
         {/* レストラン情報設定 */}
         <Card>
           <CardHeader>
-            <CardTitle>🏪 レストラン情報設定</CardTitle>
+            <CardTitle className="text-lg md:text-xl">🏪 レストラン情報設定</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">レストラン名</label>
                 <Input
                   value={restaurantName}
                   onChange={(e) => setRestaurantName(e.target.value)}
                   placeholder="Il Giardino"
+                  className="h-12 md:h-10 text-base"
                 />
               </div>
               <div className="space-y-2">
@@ -179,6 +180,7 @@ export default function MenuPage() {
                   value={restaurantTagline}
                   onChange={(e) => setRestaurantTagline(e.target.value)}
                   placeholder="Authentic Italian Cuisine • Est. 1995"
+                  className="h-12 md:h-10 text-base"
                 />
               </div>
             </div>
@@ -188,15 +190,18 @@ export default function MenuPage() {
         {/* 入力セクション */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
               <Sparkles className="h-5 w-5" />
               日本語メニューを入力
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
-              <div className="text-sm text-muted-foreground mb-2">
-                メニュー項目を「メニュー名 価格 説明」の形式で1行ずつ入力してください
+              <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                <strong>入力形式:</strong> メニュー名 価格 説明（説明は省略可）
+                <div className="mt-2 text-xs">
+                  例: Margherita Pizza 2,800円 トマトソース、モッツァレラチーズ、バジル
+                </div>
               </div>
 
               {menuInputs.map((input, index) => (
@@ -237,10 +242,11 @@ export default function MenuPage() {
               </Button>
             </div>
 
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 onClick={loadSampleMenu}
                 variant="outline"
+                className="h-12 text-base"
               >
                 サンプルメニューを読み込む
               </Button>
@@ -248,16 +254,16 @@ export default function MenuPage() {
               <Button
                 onClick={translateMenu}
                 disabled={!menuInputs.some(input => input.trim()) || isLoading}
-                className="flex items-center gap-2"
+                className="flex items-center justify-center gap-2 h-12 text-base flex-1 sm:flex-none"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-5 w-5 animate-spin" />
                     翻訳中...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="h-4 w-4" />
+                    <Sparkles className="h-5 w-5" />
                     英語に翻訳
                   </>
                 )}
@@ -268,11 +274,11 @@ export default function MenuPage() {
 
         {/* 表示モード切り替え */}
         {menuItems.length > 0 && (
-          <div className="flex gap-2 mb-4">
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
             <Button
               onClick={() => setShowItalianMenu(false)}
               variant={!showItalianMenu ? "default" : "outline"}
-              size="sm"
+              className="h-12 text-base flex-1"
             >
               📝 翻訳結果
             </Button>
@@ -285,7 +291,7 @@ export default function MenuPage() {
                 window.open(url, '_blank');
               }}
               variant="outline"
-              size="sm"
+              className="h-12 text-base flex-1"
             >
               🍽️ メニュー表を開く
             </Button>
@@ -296,15 +302,14 @@ export default function MenuPage() {
         {menuItems.length > 0 && !showItalianMenu && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
+              <CardTitle className="flex items-center justify-between text-lg md:text-xl">
                 <span className="flex items-center gap-2">
                   🌍 翻訳結果
                 </span>
                 <Button
                   onClick={copyAllMenu}
                   variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
+                  className="h-10 px-4 flex items-center gap-2 text-sm"
                 >
                   {copiedItem === 'all' ? (
                     <>
@@ -324,40 +329,42 @@ export default function MenuPage() {
               {menuItems.map((item, index) => (
                 <div key={item.id} className="border rounded-lg p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <Badge variant="secondary">項目 {index + 1}</Badge>
+                    <Badge variant="secondary" className="text-xs">項目 {index + 1}</Badge>
                     <Button
                       onClick={() => copyToClipboard(`${item.japanese}\n${item.english}`, item.id)}
                       variant="ghost"
                       size="sm"
-                      className="flex items-center gap-2"
+                      className="h-8 px-3 flex items-center gap-2 text-sm"
                     >
                       {copiedItem === item.id ? (
                         <>
                           <Check className="h-4 w-4" />
-                          コピー済み
+                          <span className="hidden sm:inline">コピー済み</span>
+                          <span className="sm:hidden">済</span>
                         </>
                       ) : (
                         <>
                           <Copy className="h-4 w-4" />
-                          コピー
+                          <span className="hidden sm:inline">コピー</span>
+                          <span className="sm:hidden">コ</span>
                         </>
                       )}
                     </Button>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline">🇯🇵 日本語</Badge>
+                        <Badge variant="outline" className="text-xs">🇯🇵 日本語</Badge>
                       </div>
-                      <p className="text-sm bg-muted p-3 rounded-md">{item.japanese}</p>
+                      <p className="text-sm bg-muted p-3 rounded-md leading-relaxed">{item.japanese}</p>
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline">🇺🇸 英語</Badge>
+                        <Badge variant="outline" className="text-xs">🇺🇸 英語</Badge>
                       </div>
-                      <p className="text-sm bg-muted p-3 rounded-md">{item.english}</p>
+                      <p className="text-sm bg-muted p-3 rounded-md leading-relaxed">{item.english}</p>
                     </div>
                   </div>
                 </div>
@@ -416,13 +423,13 @@ const generateMenuHtml = (menuItems: MenuItem[], restaurantName: string, restaur
     if (items.length === 0) return '';
 
     return `
-      <div style="margin-bottom: 2rem;">
-        <h3 style="font-size: 1.25rem; font-weight: bold; color: #92400e; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-          <span style="width: 1.5rem; height: 0.125rem; background-color: #92400e;"></span>
+      <div class="menu-section">
+        <h3>
+          <span class="divider"></span>
           ${title}
-          <span style="font-size: 0.875rem; font-weight: normal; color: #92400e;">(${subtitle})</span>
+          <span class="subtitle">(${subtitle})</span>
         </h3>
-        <div style="space-y: 0.75rem;">
+        <div>
           ${items.map(item => {
             const priceMatch = item.english.match(/([¥$]?\d{1,3}(?:,\d{3})*)/);
             const price = priceMatch ? priceMatch[0] : '';
@@ -431,18 +438,12 @@ const generateMenuHtml = (menuItems: MenuItem[], restaurantName: string, restaur
             const desc = description.split(' ').slice(1).join(' ');
 
             return `
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 0.75rem 0; border-bottom: 1px solid #fef3c7;">
-                <div style="flex: 1;">
-                  <div style="font-size: 1.125rem; font-weight: 600; color: #92400e; line-height: 1.5;">
-                    ${name}
-                  </div>
-                  ${desc ? `<div style="font-size: 0.875rem; color: #92400e; margin-top: 0.25rem; line-height: 1.4;">
-                    ${desc}
-                  </div>` : ''}
+              <div class="menu-item">
+                <div class="menu-item-content">
+                  <div class="menu-item-name">${name}</div>
+                  ${desc ? `<div class="menu-item-desc">${desc}</div>` : ''}
                 </div>
-                <div style="font-size: 1.125rem; font-weight: bold; color: #92400e; margin-left: 1rem;">
-                  ${price}
-                </div>
+                <div class="menu-item-price">${price}</div>
               </div>
             `;
           }).join('')}
@@ -465,7 +466,7 @@ const generateMenuHtml = (menuItems: MenuItem[], restaurantName: string, restaur
             color: #92400e;
             background: linear-gradient(to bottom right, #fef7ed, #fed7aa);
             margin: 0;
-            padding: 2rem;
+            padding: 1rem;
             min-height: 100vh;
         }
         .container {
@@ -479,43 +480,127 @@ const generateMenuHtml = (menuItems: MenuItem[], restaurantName: string, restaur
         }
         .header {
             text-align: center;
-            padding: 3rem 2rem 2rem;
+            padding: 2rem 1.5rem 1.5rem;
             background: linear-gradient(135deg, #fef3c7, #fed7aa);
         }
         .restaurant-name {
-            font-size: 3rem;
+            font-size: 2rem;
             font-weight: bold;
             color: #92400e;
             margin-bottom: 0.5rem;
         }
         .tagline {
-            font-size: 1.125rem;
+            font-size: 1rem;
             color: #92400e;
             font-weight: 500;
         }
         .content {
-            padding: 2rem;
+            padding: 1.5rem;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 0.5rem;
+            }
+            .header {
+                padding: 1.5rem 1rem 1rem;
+            }
+            .restaurant-name {
+                font-size: 1.75rem;
+            }
+            .tagline {
+                font-size: 0.875rem;
+            }
+            .content {
+                padding: 1rem;
+            }
+        }
+        .menu-section {
+            margin-bottom: 1.5rem;
+        }
+        .menu-section h3 {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #92400e;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .menu-section h3 .divider {
+            width: 1rem;
+            height: 0.125rem;
+            background-color: #92400e;
+        }
+        .menu-section h3 .subtitle {
+            font-size: 0.75rem;
+            font-weight: normal;
+            color: #92400e;
+        }
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #fef3c7;
+        }
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        .menu-item-content {
+            flex: 1;
+        }
+        .menu-item-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #92400e;
+            line-height: 1.3;
+        }
+        .menu-item-desc {
+            font-size: 0.8rem;
+            color: #92400e;
+            margin-top: 0.125rem;
+            line-height: 1.4;
+        }
+        .menu-item-price {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #92400e;
+            margin-left: 0.75rem;
         }
         .footer {
             text-align: center;
-            padding: 1.5rem;
+            padding: 1rem;
             background: #fef3c7;
             border-top: 1px solid #92400e;
-            margin-top: 2rem;
+            margin-top: 1.5rem;
         }
         .footer-text {
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             color: #92400e;
             font-style: italic;
         }
         .footer-note {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: #92400e;
-            margin-top: 0.5rem;
+            margin-top: 0.25rem;
         }
+
+        @media (max-width: 640px) {
+            .menu-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .menu-item-price {
+                margin-left: 0;
+                margin-top: 0.25rem;
+                text-align: right;
+            }
+        }
+
         @media print {
-            body { background: white; padding: 0; }
-            .container { box-shadow: none; border: none; }
+            body { background: white !important; padding: 0 !important; }
+            .container { box-shadow: none !important; border: none !important; }
         }
     </style>
 </head>
