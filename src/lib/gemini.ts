@@ -1,14 +1,14 @@
 import { VertexAI } from '@google-cloud/vertexai';
 
-// Initialize Vertex AI with Gemini API
-let vertexAI: VertexAI | null = null;
-let model: any = null;
+// Initialize Vertex AI with Gemini API for production
+let vertexAI: VertexAI;
+let model: any;
 
 try {
-  // サービスアカウント認証を使用（Application Default Credentials）
+  // 本番環境ではサービスアカウント認証のみ使用
   vertexAI = new VertexAI({
     project: process.env.GOOGLE_CLOUD_PROJECT || 'table-484004',
-    location: 'us-central1', // Gemini APIのリージョン
+    location: 'asia-southeast1', // シンガポールリージョン（より安定）
   });
 
   model = vertexAI.getGenerativeModel({
@@ -17,8 +17,10 @@ try {
 
   console.log('Gemini API initialized with service account authentication');
 } catch (error) {
-  console.warn('Failed to initialize Gemini API with service account:', error);
-  console.warn('Make sure GOOGLE_APPLICATION_CREDENTIALS is set or running in GCP environment');
+  console.error('Failed to initialize Gemini API with service account:', error);
+  console.error('Please check service account permissions and GCP project configuration');
+  // エラーが発生してもアプリケーションは動作するようにする
+  model = null;
 }
 
 export interface TranslationRequest {
