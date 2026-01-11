@@ -6,19 +6,25 @@ let model: any;
 
 try {
   // 本番環境ではサービスアカウント認証のみ使用
+  const projectId = process.env.GOOGLE_CLOUD_PROJECT || 'table-484004';
+  console.log(`Initializing Vertex AI with project: ${projectId}, location: us-central1`);
+
   vertexAI = new VertexAI({
-    project: process.env.GOOGLE_CLOUD_PROJECT || 'table-484004',
-    location: 'asia-southeast1', // シンガポールリージョン（より安定）
+    project: projectId,
+    location: 'us-central1',
   });
 
   model = vertexAI.getGenerativeModel({
     model: 'gemini-1.5-flash',
   });
 
-  console.log('Gemini API initialized with service account authentication');
+  console.log('✅ Gemini API initialized successfully with service account authentication');
 } catch (error) {
-  console.error('Failed to initialize Gemini API with service account:', error);
-  console.error('Please check service account permissions and GCP project configuration');
+  console.error('❌ Failed to initialize Gemini API with service account:', error);
+  console.error('Please check:');
+  console.error('1. Service account has aiplatform.user role');
+  console.error('2. Vertex AI API is enabled');
+  console.error('3. GOOGLE_CLOUD_PROJECT environment variable is set');
   // エラーが発生してもアプリケーションは動作するようにする
   model = null;
 }
@@ -55,9 +61,13 @@ export async function translateText(request: TranslationRequest): Promise<Transl
 
     prompt += '\n\nPlease provide only the translated text without any additional explanations or quotes.';
 
+    console.log('Calling Vertex AI generateContent...');
     const result = await model.generateContent(prompt);
+    console.log('Vertex AI response received');
     const response = await result.response;
+    console.log('Response parsed:', response.candidates?.length || 0, 'candidates');
     const translatedText = response.candidates[0].content.parts[0].text.trim();
+    console.log('Translation completed successfully');
 
     return {
       translatedText,
