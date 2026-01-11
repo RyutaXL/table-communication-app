@@ -89,16 +89,16 @@ export default function Home() {
               </TabsTrigger>
               <TabsTrigger value="other" className="flex items-center gap-1 md:gap-2 whitespace-nowrap px-3 py-2 text-xs md:text-sm">
                 <MessageSquare className="h-3 w-3 md:h-4 md:w-4 text-blue-600" />
-                <span className="hidden xs:inline font-medium">その他</span>
-                <span className="xs:hidden font-medium">他</span>
+                <span className="hidden sm:inline font-medium">その他</span>
+                <span className="sm:hidden font-medium">他</span>
                 <Badge variant="secondary" className="text-xs ml-1">
                   {categoryStats.other}
                 </Badge>
               </TabsTrigger>
               <TabsTrigger value="billing" className="flex items-center gap-1 md:gap-2 whitespace-nowrap px-3 py-2 text-xs md:text-sm">
                 <CreditCard className="h-3 w-3 md:h-4 md:w-4 text-green-600" />
-                <span className="hidden xs:inline font-medium">会計</span>
-                <span className="xs:hidden font-medium">会</span>
+                <span className="hidden sm:inline font-medium">会計</span>
+                <span className="sm:hidden font-medium">会</span>
                 <Badge variant="secondary" className="text-xs ml-1">
                   {categoryStats.billing}
                 </Badge>
