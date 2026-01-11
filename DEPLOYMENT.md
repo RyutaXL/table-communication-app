@@ -103,11 +103,16 @@ jobs:
     - 'deploy'
     - 'table-communication-app'
     - '--set-env-vars'
-    - 'NODE_ENV=production'
+    - 'NODE_ENV=production,GOOGLE_AI_API_KEY=YOUR_API_KEY'
     - '--image'
     - 'gcr.io/$PROJECT_ID/table-communication-app:$COMMIT_SHA'
     # ... other args
 ```
+
+#### Gemini API設定
+1. [Google AI Studio](https://makersuite.google.com/app/apikey) でAPIキーを作成
+2. 環境変数 `GOOGLE_AI_API_KEY` に設定
+3. サービスアカウント `table-gemini@table-484004.iam.gserviceaccount.com` がVertex AI User権限を持つことを確認
 
 ### Custom Domain
 ```bash

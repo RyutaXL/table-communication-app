@@ -3,11 +3,14 @@
 import { useState } from 'react';
 import { QuickResponse, categoryColors, categoryNames } from '@/lib/demo-data';
 import { useLanguageStore } from '@/lib/language-store';
+import { useImproveResponse } from '@/lib/use-gemini';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Sparkles, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 
 interface QuickResponseCardProps {
@@ -17,10 +20,14 @@ interface QuickResponseCardProps {
 export function QuickResponseCard({ response }: QuickResponseCardProps) {
   const { currentLanguage } = useLanguageStore();
   const [isOpen, setIsOpen] = useState(false);
+  const [improvedContent, setImprovedContent] = useState<string | null>(null);
+
+  const { improve, isPending: isImproving } = useImproveResponse();
 
   const content = response.content_translations[currentLanguage];
   const categoryColor = categoryColors[response.category];
   const categoryName = categoryNames[response.category];
+  const displayContent = improvedContent || content;
 
   return (
     <>
@@ -85,10 +92,44 @@ export function QuickResponseCard({ response }: QuickResponseCardProps) {
             <div className="bg-white border-2 border-gray-200 rounded-xl shadow-lg p-6 md:p-8">
               <div className="text-center">
                 <p className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-gray-900 mb-4">
-                  {content}
+                  {displayContent}
                 </p>
                 <div className="w-20 h-1 bg-primary mx-auto rounded-full"></div>
               </div>
+            </div>
+
+            <div className="flex gap-2 justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const improved = await improve(content, currentLanguage);
+                    setImprovedContent(improved);
+                  } catch (error) {
+                    console.error('Failed to improve response:', error);
+                  }
+                }}
+                disabled={isImproving}
+                className="flex items-center gap-2"
+              >
+                {isImproving ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+                {isImproving ? '改善中...' : 'AI改善'}
+              </Button>
+
+              {improvedContent && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setImprovedContent(null)}
+                >
+                  元に戻す
+                </Button>
+              )}
             </div>
 
             <div className="text-center">
