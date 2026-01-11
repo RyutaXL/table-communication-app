@@ -56,6 +56,16 @@ export default function Home() {
       <Header />
 
       <main className="container mx-auto px-4 py-4 md:py-6 space-y-4 md:space-y-6">
+        {/* ページヘッダー */}
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl md:text-3xl font-bold">
+            💬 クイック回答
+          </h1>
+          <p className="text-muted-foreground">
+            タップですぐに使える定型文集
+          </p>
+        </div>
+
         {/* 検索バー - モバイルでは高さを大きくしてタッチしやすく */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
