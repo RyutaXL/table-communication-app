@@ -87,34 +87,30 @@ export default function Home() {
                   {demoResponses.length}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="other" className="flex items-center gap-1 md:gap-2 whitespace-nowrap px-3 py-2 text-xs md:text-sm">
-                <MessageSquare className="h-3 w-3 md:h-4 md:w-4 text-blue-600" />
-                <span className="hidden sm:inline font-medium">その他</span>
-                <span className="sm:hidden font-medium">他</span>
+              <TabsTrigger value="other" className="flex items-center gap-1 whitespace-nowrap px-2 py-2 text-xs">
+                <MessageSquare className="h-3 w-3 text-blue-600" />
+                <span className="font-medium">その他</span>
                 <Badge variant="secondary" className="text-xs ml-1">
                   {categoryStats.other}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="billing" className="flex items-center gap-1 md:gap-2 whitespace-nowrap px-3 py-2 text-xs md:text-sm">
-                <CreditCard className="h-3 w-3 md:h-4 md:w-4 text-green-600" />
-                <span className="hidden sm:inline font-medium">会計</span>
-                <span className="sm:hidden font-medium">会</span>
+              <TabsTrigger value="billing" className="flex items-center gap-1 whitespace-nowrap px-2 py-2 text-xs">
+                <CreditCard className="h-3 w-3 text-green-600" />
+                <span className="font-medium">会計</span>
                 <Badge variant="secondary" className="text-xs ml-1">
                   {categoryStats.billing}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="allergy" className="flex items-center gap-1 md:gap-2 whitespace-nowrap px-3 py-2 text-xs md:text-sm">
-                <Users className="h-3 w-3 md:h-4 md:w-4 text-red-600" />
-                <span className="hidden sm:inline font-medium">アレルギー</span>
-                <span className="sm:hidden font-medium">アレ</span>
+              <TabsTrigger value="allergy" className="flex items-center gap-1 whitespace-nowrap px-2 py-2 text-xs">
+                <Users className="h-3 w-3 text-red-600" />
+                <span className="font-medium">アレルギー</span>
                 <Badge variant="secondary" className="text-xs ml-1">
                   {categoryStats.allergy}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="how-to-eat" className="flex items-center gap-1 md:gap-2 whitespace-nowrap px-3 py-2 text-xs md:text-sm">
-                <ChefHat className="h-3 w-3 md:h-4 md:w-4 text-orange-600" />
-                <span className="hidden md:inline font-medium">食べ方</span>
-                <span className="md:hidden font-medium">食</span>
+              <TabsTrigger value="how-to-eat" className="flex items-center gap-1 whitespace-nowrap px-2 py-2 text-xs">
+                <ChefHat className="h-3 w-3 text-orange-600" />
+                <span className="font-medium">食べ方</span>
                 <Badge variant="secondary" className="text-xs ml-1">
                   {categoryStats['how-to-eat']}
                 </Badge>
