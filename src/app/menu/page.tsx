@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useTranslation } from '@/lib/use-gemini';
-import { Loader2, Sparkles, Copy, Check } from 'lucide-react';
+import { Loader2, Sparkles, Copy, Check, Plus, X } from 'lucide-react';
 import { useLanguageStore } from '@/lib/language-store';
 
 interface MenuItem {
@@ -18,32 +19,6 @@ interface MenuItem {
   description?: string;
 }
 
-const MenuItemDisplay = ({ item }: { item: MenuItem }) => {
-  // 英語のテキストから価格を抽出
-  const priceMatch = item.english.match(/([¥$]?\d{1,3}(?:,\d{3})*)/);
-  const price = priceMatch ? priceMatch[0] : '';
-
-  // 価格を除いた説明部分
-  const description = item.english.replace(price, '').replace(/^[¥$]\d{1,3}(?:,\d{3})*\s*/, '').trim();
-
-  return (
-    <div className="flex justify-between items-start py-2 border-b border-amber-100 last:border-b-0">
-      <div className="flex-1">
-        <div className="font-serif text-lg font-semibold text-amber-900 leading-tight">
-          {description.split(' ')[0] || 'Menu Item'}
-        </div>
-        {description.split(' ').slice(1).length > 0 && (
-          <div className="text-sm text-amber-700 italic mt-1 leading-relaxed">
-            {description.split(' ').slice(1).join(' ')}
-          </div>
-        )}
-      </div>
-      <div className="text-lg font-serif font-bold text-amber-900 ml-4">
-        {price}
-      </div>
-    </div>
-  );
-};
 
 interface MenuItem {
   id: string;
@@ -56,10 +31,11 @@ export default function MenuPage() {
   const { currentLanguage } = useLanguageStore();
   const { translate, isLoading } = useTranslation();
 
-  const [inputText, setInputText] = useState('');
+  const [menuInputs, setMenuInputs] = useState<string[]>(['']);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
-  const [showItalianMenu, setShowItalianMenu] = useState(false);
+  const [restaurantName, setRestaurantName] = useState('Il Giardino');
+  const [restaurantTagline, setRestaurantTagline] = useState('Authentic Italian Cuisine • Est. 1995');
 
   // サンプルメニューデータ（イタリアンレストラン風に変更）
   const sampleMenus = [
@@ -71,28 +47,36 @@ export default function MenuPage() {
   ];
 
   const loadSampleMenu = () => {
-    setInputText(sampleMenus.join('\n\n'));
+    setMenuInputs(sampleMenus);
   };
 
   const translateMenu = async () => {
-    if (!inputText.trim()) return;
-
-    const lines = inputText.split('\n').filter(line => line.trim());
-    if (lines.length === 0) return;
+    const nonEmptyInputs = menuInputs.filter(input => input.trim());
+    if (nonEmptyInputs.length === 0) return;
 
     try {
       // 全てのメニュー項目を1回のLLMコールで翻訳
-      const menuText = lines.join('\n');
+      const menuText = nonEmptyInputs.join('\n');
       const batchTranslation = await translate({
         text: menuText,
         targetLanguage: 'en',
-        context: `レストランメニューの項目を英語に翻訳してください。各行の形式は「メニュー名 価格 説明」です。価格はそのまま残し、メニュー名と説明を自然な英語に翻訳してください。元の行の構造を保持してください。
+        context: `あなたはプロのレストラン翻訳者です。各メニュー項目を英語に翻訳してください。
 
-例:
+【翻訳ルール】
+1. 各行の形式: 「メニュー名 価格 説明」
+2. 価格（例: 2,800円）は変更せずそのまま残す
+3. メニュー名と説明文を自然で流暢な英語に翻訳
+4. レストランらしい洗練された表現を使用
+5. 元の行の構造を厳密に保持
+
+【例】
 日本語: Margherita Pizza 2,800円 トマトソース、モッツァレラチーズ、バジル
 英語: Margherita Pizza ¥2,800 Fresh tomato sauce, mozzarella cheese, basil
 
-各行を別々に翻訳し、改行で区切って返してください。`
+日本語: Carbonara Pasta 2,200円 クリームソース、ベーコン、パルメザンチーズ
+英語: Carbonara Pasta ¥2,200 Rich cream sauce, pancetta, parmesan cheese
+
+各行を別々に翻訳し、改行で区切って返してください。説明文は特に美味しそうで魅力的な英語表現にしてください。`
       });
 
       // 翻訳結果を行ごとに分割
@@ -100,8 +84,8 @@ export default function MenuPage() {
 
       const newMenuItems: MenuItem[] = [];
 
-      for (let i = 0; i < lines.length; i++) {
-        const japanese = lines[i];
+      for (let i = 0; i < nonEmptyInputs.length; i++) {
+        const japanese = nonEmptyInputs[i];
         const english = translatedLines[i] || japanese; // 翻訳結果がない場合は原文を使用
 
         newMenuItems.push({
@@ -115,7 +99,7 @@ export default function MenuPage() {
     } catch (error) {
       console.error('Translation failed:', error);
       // エラーが発生した場合は全て原文を使用
-      const newMenuItems: MenuItem[] = lines.map(line => ({
+      const newMenuItems: MenuItem[] = nonEmptyInputs.map(line => ({
         id: Date.now().toString() + Math.random(),
         japanese: line,
         english: line,
@@ -131,6 +115,23 @@ export default function MenuPage() {
       setTimeout(() => setCopiedItem(null), 2000);
     } catch (error) {
       console.error('Copy failed:', error);
+    }
+  };
+
+  const updateMenuInput = (index: number, value: string) => {
+    const newInputs = [...menuInputs];
+    newInputs[index] = value;
+    setMenuInputs(newInputs);
+  };
+
+  const addMenuInput = () => {
+    setMenuInputs([...menuInputs, '']);
+  };
+
+  const removeMenuInput = (index: number) => {
+    if (menuInputs.length > 1) {
+      const newInputs = menuInputs.filter((_, i) => i !== index);
+      setMenuInputs(newInputs);
     }
   };
 
@@ -157,6 +158,33 @@ export default function MenuPage() {
           </p>
         </div>
 
+        {/* レストラン情報設定 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>🏪 レストラン情報設定</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">レストラン名</label>
+                <Input
+                  value={restaurantName}
+                  onChange={(e) => setRestaurantName(e.target.value)}
+                  placeholder="Il Giardino"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">キャッチコピー</label>
+                <Input
+                  value={restaurantTagline}
+                  onChange={(e) => setRestaurantTagline(e.target.value)}
+                  placeholder="Authentic Italian Cuisine • Est. 1995"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* 入力セクション */}
         <Card>
           <CardHeader>
@@ -166,12 +194,48 @@ export default function MenuPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Textarea
-              placeholder="メニュー項目を「メニュー名 価格 説明」の形式で入力してください&#10;&#10;例:&#10;Margherita Pizza 2,800円 トマトソース、モッツァレラチーズ、バジル&#10;Carbonara Pasta 2,200円 クリームソース、ベーコン、パルメザンチーズ&#10;Osso Buco 4,500円 仔牛すね肉の煮込み、野菜のラグーソース"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              className="min-h-[200px] text-base"
-            />
+            <div className="space-y-3">
+              <div className="text-sm text-muted-foreground mb-2">
+                メニュー項目を「メニュー名 価格 説明」の形式で1行ずつ入力してください
+              </div>
+
+              {menuInputs.map((input, index) => (
+                <div key={index} className="flex gap-2 items-center">
+                  <div className="flex-1">
+                    <Input
+                      placeholder={
+                        index === 0
+                          ? "メニュー名 価格 説明 の形式で入力（説明は省略可）\n例: Margherita Pizza 2,800円 トマトソース、モッツァレラチーズ、バジル"
+                          : "メニュー項目を入力..."
+                      }
+                      value={input}
+                      onChange={(e) => updateMenuInput(index, e.target.value)}
+                      className="text-base"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeMenuInput(index)}
+                    disabled={menuInputs.length === 1}
+                    className="flex-shrink-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addMenuInput}
+                className="w-full flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                項目を追加
+              </Button>
+            </div>
 
             <div className="flex gap-2 flex-wrap">
               <Button
@@ -183,7 +247,7 @@ export default function MenuPage() {
 
               <Button
                 onClick={translateMenu}
-                disabled={!inputText.trim() || isLoading}
+                disabled={!menuInputs.some(input => input.trim()) || isLoading}
                 className="flex items-center gap-2"
               >
                 {isLoading ? (
@@ -213,11 +277,17 @@ export default function MenuPage() {
               📝 翻訳結果
             </Button>
             <Button
-              onClick={() => setShowItalianMenu(true)}
-              variant={showItalianMenu ? "default" : "outline"}
+              onClick={() => {
+                // メニュー表を別タブで開く
+                const menuHtml = generateMenuHtml(menuItems, restaurantName, restaurantTagline);
+                const blob = new Blob([menuHtml], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+              }}
+              variant="outline"
               size="sm"
             >
-              🍽️ メニュー表
+              🍽️ メニュー表を開く
             </Button>
           </div>
         )}
@@ -302,165 +372,184 @@ export default function MenuPage() {
           </Card>
         )}
 
-        {/* 高級イタリアンレストラン風メニュー表 */}
-        {menuItems.length > 0 && showItalianMenu && (
-          <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50">
-            <CardHeader className="text-center pb-6">
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <div className="w-8 h-0.5 bg-amber-600"></div>
-                <span className="text-2xl font-serif font-bold text-amber-900">🍽️</span>
-                <div className="w-8 h-0.5 bg-amber-600"></div>
+        {/* メニュー表は別タブで開きます */}
+
+// メニュー表HTML生成関数
+const generateMenuHtml = (menuItems: MenuItem[], restaurantName: string, restaurantTagline: string): string => {
+  const categorizedItems = {
+    antipasti: menuItems.filter(item =>
+      item.english.toLowerCase().includes('bruschetta') ||
+      item.english.toLowerCase().includes('antipasti') ||
+      item.english.toLowerCase().includes('appetizer')
+    ),
+    primi: menuItems.filter(item =>
+      item.english.toLowerCase().includes('pasta') ||
+      item.english.toLowerCase().includes('risotto')
+    ),
+    pizza: menuItems.filter(item =>
+      item.english.toLowerCase().includes('pizza')
+    ),
+    secondi: menuItems.filter(item =>
+      item.english.toLowerCase().includes('osso buco') ||
+      item.english.toLowerCase().includes('meat') ||
+      item.english.toLowerCase().includes('fish')
+    ),
+    dolci: menuItems.filter(item =>
+      item.english.toLowerCase().includes('tiramisu') ||
+      item.english.toLowerCase().includes('dessert')
+    ),
+    altri: menuItems.filter(item => {
+      const lower = item.english.toLowerCase();
+      return !lower.includes('bruschetta') &&
+             !lower.includes('pasta') &&
+             !lower.includes('risotto') &&
+             !lower.includes('pizza') &&
+             !lower.includes('osso buco') &&
+             !lower.includes('meat') &&
+             !lower.includes('fish') &&
+             !lower.includes('tiramisu') &&
+             !lower.includes('dessert');
+    })
+  };
+
+  const renderMenuSection = (title: string, subtitle: string, items: MenuItem[]) => {
+    if (items.length === 0) return '';
+
+    return `
+      <div style="margin-bottom: 2rem;">
+        <h3 style="font-size: 1.25rem; font-weight: bold; color: #92400e; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+          <span style="width: 1.5rem; height: 0.125rem; background-color: #92400e;"></span>
+          ${title}
+          <span style="font-size: 0.875rem; font-weight: normal; color: #92400e;">(${subtitle})</span>
+        </h3>
+        <div style="space-y: 0.75rem;">
+          ${items.map(item => {
+            const priceMatch = item.english.match(/([¥$]?\d{1,3}(?:,\d{3})*)/);
+            const price = priceMatch ? priceMatch[0] : '';
+            const description = item.english.replace(price, '').replace(/^[¥$]\d{1,3}(?:,\d{3})*\s*/, '').trim();
+            const name = description.split(' ')[0] || 'Menu Item';
+            const desc = description.split(' ').slice(1).join(' ');
+
+            return `
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 0.75rem 0; border-bottom: 1px solid #fef3c7;">
+                <div style="flex: 1;">
+                  <div style="font-size: 1.125rem; font-weight: 600; color: #92400e; line-height: 1.5;">
+                    ${name}
+                  </div>
+                  ${desc ? `<div style="font-size: 0.875rem; color: #92400e; margin-top: 0.25rem; line-height: 1.4;">
+                    ${desc}
+                  </div>` : ''}
+                </div>
+                <div style="font-size: 1.125rem; font-weight: bold; color: #92400e; margin-left: 1rem;">
+                  ${price}
+                </div>
               </div>
-              <CardTitle className="text-3xl font-serif font-bold text-amber-900 mb-1">
-                Il Giardino
-              </CardTitle>
-              <p className="text-sm text-amber-700 font-medium">
-                Authentic Italian Cuisine • Est. 1995
-              </p>
-            </CardHeader>
-            <CardContent className="px-8 pb-8">
-              {/* メニューセクション分け */}
-              <div className="space-y-8">
-                {/* Antipasti */}
-                {menuItems.some(item => item.english.toLowerCase().includes('bruschetta') || item.english.toLowerCase().includes('antipasti')) && (
-                  <div>
-                    <h3 className="text-xl font-serif font-bold text-amber-900 mb-4 flex items-center gap-2">
-                      <span className="w-6 h-0.5 bg-amber-600"></span>
-                      Antipasti
-                      <span className="text-sm font-normal text-amber-700">(Appetizers)</span>
-                    </h3>
-                    <div className="space-y-3">
-                      {menuItems.filter(item =>
-                        item.english.toLowerCase().includes('bruschetta') ||
-                        item.english.toLowerCase().includes('antipasti') ||
-                        item.english.toLowerCase().includes('appetizer')
-                      ).map((item, index) => (
-                        <MenuItemDisplay key={item.id} item={item} />
-                      ))}
-                    </div>
-                  </div>
-                )}
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  };
 
-                {/* Primi Piatti */}
-                {menuItems.some(item => item.english.toLowerCase().includes('pasta') || item.english.toLowerCase().includes('risotto')) && (
-                  <div>
-                    <h3 className="text-xl font-serif font-bold text-amber-900 mb-4 flex items-center gap-2">
-                      <span className="w-6 h-0.5 bg-amber-600"></span>
-                      Primi Piatti
-                      <span className="text-sm font-normal text-amber-700">(First Courses)</span>
-                    </h3>
-                    <div className="space-y-3">
-                      {menuItems.filter(item =>
-                        item.english.toLowerCase().includes('pasta') ||
-                        item.english.toLowerCase().includes('risotto') ||
-                        item.english.toLowerCase().includes('carbonara')
-                      ).map((item, index) => (
-                        <MenuItemDisplay key={item.id} item={item} />
-                      ))}
-                    </div>
-                  </div>
-                )}
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${restaurantName} - Menu</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+            color: #92400e;
+            background: linear-gradient(to bottom right, #fef7ed, #fed7aa);
+            margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #92400e;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            background: linear-gradient(135deg, #fef3c7, #fed7aa);
+        }
+        .restaurant-name {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #92400e;
+            margin-bottom: 0.5rem;
+        }
+        .tagline {
+            font-size: 1.125rem;
+            color: #92400e;
+            font-weight: 500;
+        }
+        .content {
+            padding: 2rem;
+        }
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: #fef3c7;
+            border-top: 1px solid #92400e;
+            margin-top: 2rem;
+        }
+        .footer-text {
+            font-size: 0.875rem;
+            color: #92400e;
+            font-style: italic;
+        }
+        .footer-note {
+            font-size: 0.75rem;
+            color: #92400e;
+            margin-top: 0.5rem;
+        }
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
+                <span style="width: 2rem; height: 0.125rem; background-color: #92400e;"></span>
+                <span style="font-size: 2rem;">🍽️</span>
+                <span style="width: 2rem; height: 0.125rem; background-color: #92400e;"></span>
+            </div>
+            <div class="restaurant-name">${restaurantName}</div>
+            <div class="tagline">${restaurantTagline}</div>
+        </div>
 
-                {/* Pizza */}
-                {menuItems.some(item => item.english.toLowerCase().includes('pizza')) && (
-                  <div>
-                    <h3 className="text-xl font-serif font-bold text-amber-900 mb-4 flex items-center gap-2">
-                      <span className="w-6 h-0.5 bg-amber-600"></span>
-                      Pizza
-                      <span className="text-sm font-normal text-amber-700">(Wood-fired Pizzas)</span>
-                    </h3>
-                    <div className="space-y-3">
-                      {menuItems.filter(item =>
-                        item.english.toLowerCase().includes('pizza')
-                      ).map((item, index) => (
-                        <MenuItemDisplay key={item.id} item={item} />
-                      ))}
-                    </div>
-                  </div>
-                )}
+        <div class="content">
+            ${renderMenuSection('Antipasti', 'Appetizers', categorizedItems.antipasti)}
+            ${renderMenuSection('Primi Piatti', 'First Courses', categorizedItems.primi)}
+            ${renderMenuSection('Pizza', 'Wood-fired Pizzas', categorizedItems.pizza)}
+            ${renderMenuSection('Secondi Piatti', 'Main Courses', categorizedItems.secondi)}
+            ${renderMenuSection('Dolci', 'Desserts', categorizedItems.dolci)}
+            ${renderMenuSection('Specialità', 'Specialties', categorizedItems.altri)}
+        </div>
 
-                {/* Secondi Piatti */}
-                {menuItems.some(item => item.english.toLowerCase().includes('osso buco') || item.english.toLowerCase().includes('meat') || item.english.toLowerCase().includes('fish')) && (
-                  <div>
-                    <h3 className="text-xl font-serif font-bold text-amber-900 mb-4 flex items-center gap-2">
-                      <span className="w-6 h-0.5 bg-amber-600"></span>
-                      Secondi Piatti
-                      <span className="text-sm font-normal text-amber-700">(Main Courses)</span>
-                    </h3>
-                    <div className="space-y-3">
-                      {menuItems.filter(item =>
-                        item.english.toLowerCase().includes('osso buco') ||
-                        item.english.toLowerCase().includes('meat') ||
-                        item.english.toLowerCase().includes('fish') ||
-                        item.english.toLowerCase().includes('osso')
-                      ).map((item, index) => (
-                        <MenuItemDisplay key={item.id} item={item} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Dolci */}
-                {menuItems.some(item => item.english.toLowerCase().includes('tiramisu') || item.english.toLowerCase().includes('dessert') || item.english.toLowerCase().includes('dolci')) && (
-                  <div>
-                    <h3 className="text-xl font-serif font-bold text-amber-900 mb-4 flex items-center gap-2">
-                      <span className="w-6 h-0.5 bg-amber-600"></span>
-                      Dolci
-                      <span className="text-sm font-normal text-amber-700">(Desserts)</span>
-                    </h3>
-                    <div className="space-y-3">
-                      {menuItems.filter(item =>
-                        item.english.toLowerCase().includes('tiramisu') ||
-                        item.english.toLowerCase().includes('dessert') ||
-                        item.english.toLowerCase().includes('dolci')
-                      ).map((item, index) => (
-                        <MenuItemDisplay key={item.id} item={item} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* 未分類の項目 */}
-                {(() => {
-                  const categorizedItems = menuItems.filter(item =>
-                    item.english.toLowerCase().includes('bruschetta') ||
-                    item.english.toLowerCase().includes('pasta') ||
-                    item.english.toLowerCase().includes('risotto') ||
-                    item.english.toLowerCase().includes('carbonara') ||
-                    item.english.toLowerCase().includes('pizza') ||
-                    item.english.toLowerCase().includes('osso buco') ||
-                    item.english.toLowerCase().includes('tiramisu')
-                  );
-                  const uncategorizedItems = menuItems.filter(item => !categorizedItems.includes(item));
-
-                  return uncategorizedItems.length > 0 ? (
-                    <div>
-                      <h3 className="text-xl font-serif font-bold text-amber-900 mb-4 flex items-center gap-2">
-                        <span className="w-6 h-0.5 bg-amber-600"></span>
-                        Specialità
-                        <span className="text-sm font-normal text-amber-700">(Specialties)</span>
-                      </h3>
-                      <div className="space-y-3">
-                        {uncategorizedItems.map((item, index) => (
-                          <MenuItemDisplay key={item.id} item={item} />
-                        ))}
-                      </div>
-                    </div>
-                  ) : null;
-                })()}
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-amber-200 text-center">
-                <p className="text-sm text-amber-700 italic">
-                  "Bringing the authentic flavors of Italy to your table"
-                </p>
-                <p className="text-xs text-amber-600 mt-1">
-                  * All prices include tax • Subject to change without notice
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <div class="footer">
+            <div class="footer-text">"Bringing the authentic flavors of Italy to your table"</div>
+            <div class="footer-note">
+                * All prices include tax • Subject to change without notice
+            </div>
+        </div>
+    </div>
+</body>
+</html>`;
+};
 
         {/* 使用方法 */}
         <Card>
@@ -469,13 +558,16 @@ export default function MenuPage() {
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div>
-              <strong>1. メニュー入力:</strong> 「メニュー名 価格 説明」の形式で1行ずつ入力
+              <strong>1. メニュー入力:</strong> 「メニュー名 価格 説明」の形式で各項目を個別の欄に入力
             </div>
             <div>
-              <strong>2. 翻訳実行:</strong> 「英語に翻訳」ボタンでAIが一括翻訳
+              <strong>2. 項目追加:</strong> 「項目を追加」ボタンで入力欄を増やせます
             </div>
             <div>
-              <strong>3. 表示切り替え:</strong> 「翻訳結果」と「メニュー表」で表示モード変更
+              <strong>3. 翻訳実行:</strong> 「英語に翻訳」ボタンでAIが一括翻訳
+            </div>
+            <div>
+              <strong>4. 表示切り替え:</strong> 「翻訳結果」と「メニュー表」で表示モード変更
             </div>
             <div className="bg-muted p-3 rounded-md">
               <strong>💡 ヒント:</strong> 「メニュー表」モードで高級イタリアンレストラン風のメニューを表示できます。
