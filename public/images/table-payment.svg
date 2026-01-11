@@ -1,0 +1,6 @@
+<svg width="400" height="225" viewBox="0 0 400 225" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="225" fill="#f3f4f6"/>
+  <rect x="50" y="50" width="300" height="125" fill="#ffffff" stroke="#e5e7eb" stroke-width="2"/>
+  <text x="200" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#6b7280">テーブルでのお支払い</text>
+  <text x="200" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#9ca3af">Please pay at this table</text>
+</svg>

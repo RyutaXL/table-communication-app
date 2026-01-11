@@ -1,0 +1,8 @@
+<svg width="400" height="225" viewBox="0 0 400 225" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="225" fill="#f3f4f6"/>
+  <circle cx="150" cy="100" r="30" fill="#10b981"/>
+  <circle cx="250" cy="100" r="30" fill="#f59e0b"/>
+  <circle cx="200" cy="140" r="25" fill="#ef4444"/>
+  <text x="200" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">手で召し上がってください</text>
+  <text x="200" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#9ca3af">Please eat with your hands</text>
+</svg>

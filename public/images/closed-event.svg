@@ -1,0 +1,8 @@
+<svg width="400" height="225" viewBox="0 0 400 225" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="225" fill="#f3f4f6"/>
+  <rect x="150" y="70" width="100" height="60" fill="#ffffff" stroke="#e5e7eb" stroke-width="2"/>
+  <text x="200" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">貸切</text>
+  <text x="200" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9ca3af">Private Event</text>
+  <text x="200" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">本日は貸し切りです</text>
+  <text x="200" y="185" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#9ca3af">Closed for private event today</text>
+</svg>

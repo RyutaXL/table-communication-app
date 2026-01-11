@@ -1,0 +1,9 @@
+<svg width="400" height="225" viewBox="0 0 400 225" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="225" fill="#f3f4f6"/>
+  <rect x="160" y="80" width="80" height="80" fill="#ffffff" stroke="#e5e7eb" stroke-width="2"/>
+  <circle cx="180" cy="100" r="8" fill="#6b7280"/>
+  <circle cx="220" cy="100" r="8" fill="#6b7280"/>
+  <rect x="175" y="115" width="50" height="25" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="200" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">お手洗いはこちら</text>
+  <text x="200" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#9ca3af">Restroom this way</text>
+</svg>
