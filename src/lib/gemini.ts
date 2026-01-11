@@ -15,7 +15,7 @@ try {
   });
 
   model = vertexAI.getGenerativeModel({
-    model: 'gemini-1.5-pro',
+    model: 'gemini-2.0-flash-exp',
   });
 
   console.log('✅ Gemini API initialized successfully with service account authentication');
