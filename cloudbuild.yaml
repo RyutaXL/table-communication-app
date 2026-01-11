@@ -41,6 +41,8 @@ steps:
       - '300'
       - '--concurrency'
       - '80'
+      - '--set-env-vars'
+      - 'GOOGLE_AI_API_KEY=${_GEMINI_API_KEY}'
 
 # Store images
 images:
@@ -49,3 +51,7 @@ images:
 
 # Set timeout
 timeout: '600s'
+
+# Environment variables for build
+substitutions:
+  _GEMINI_API_KEY: "" # Set this in Cloud Build trigger or via gcloud builds submit --substitutions
